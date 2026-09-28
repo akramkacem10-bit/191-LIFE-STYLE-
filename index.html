@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <link rel="manifest" href="manifest.webmanifest">
+  <title>AKRAM LIFE OS</title>
+  <style>
+    :root{--bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--ok:#15803d;--warn:#b45309;--danger:#b91c1c}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+    header{padding:20px 18px 12px;background:var(--accent);color:#fff;position:sticky;top:0;z-index:5}
+    header h1{font-size:23px;margin:0 0 4px} header p{margin:0;color:#d1d5db;font-size:13px}
+    main{max-width:900px;margin:auto;padding:14px 14px 90px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px #00000008}
+    .hero{background:linear-gradient(135deg,#111827,#374151);color:#fff}.hero .muted{color:#d1d5db}
+    h2{font-size:16px;margin:0 0 10px}.big{font-size:28px;font-weight:800}.muted{color:var(--muted);font-size:13px}.tag{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef2ff;font-size:12px;margin:3px}
+    button,input,select,textarea{font:inherit} button{border:0;border-radius:11px;padding:10px 12px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+    button.secondary{background:#eef0f3;color:#111827}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .task{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}.task:last-child{border-bottom:0}.task input{width:auto}
+    nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px env(safe-area-inset-right) calc(8px + env(safe-area-inset-bottom)) env(safe-area-inset-left);z-index:10}
+    nav button{background:transparent;color:#6b7280;padding:7px 5px;font-size:11px}.active{color:#111827!important;font-weight:900}
+    .section{display:none}.section.active{display:block}.score{font-size:42px;font-weight:900}.bar{height:9px;background:#e5e7eb;border-radius:20px;overflow:hidden}.bar>i{display:block;height:100%;background:#111827}
+    @media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
+  </style>
+</head>
+<body>
+<header><h1>AKRAM LIFE OS</h1><p>Personal Manager • Football • Work • Study</p></header>
+<main>
+  <section id="home" class="section active">
+    <div class="card hero"><div class="between"><div><div class="muted">Aujourd'hui</div><h2 id="dateLabel">—</h2></div><div class="score" id="readiness">—</div></div><p id="readinessText">Renseigne ton état du jour pour calculer ta préparation.</p></div>
+    <div class="grid">
+      <div class="card"><div class="muted">Travail</div><div class="big">09:00–14:00</div><div class="muted">Dimanche → Jeudi</div></div>
+      <div class="card"><div class="muted">Football</div><div class="big" id="footballToday">0</div><div class="muted">activité(s) aujourd'hui</div></div>
+      <div class="card"><div class="muted">Étude</div><div class="big" id="studyToday">0m</div><div class="muted">objectif du jour</div></div>
+      <div class="card"><div class="muted">Discipline</div><div class="big" id="discipline">0%</div><div class="muted">tâches terminées</div></div>
+    </div>
+    <div class="card"><div class="between"><h2>Check-in quotidien</h2><button onclick="saveCheckin()">Enregistrer</button></div>
+      <div class="formgrid">
+        <label class="muted">Sommeil (h)<input id="sleep" type="number" min="0" max="12" step=".1" value="7"></label>
+        <label class="muted">Énergie /10<input id="energy" type="number" min="1" max="10" value="7"></label>
+        <label class="muted">Fatigue /10<input id="fatigue" type="number" min="0" max="10" value="3"></label>
+        <label class="muted">Douleur /10<input id="pain" type="number" min="0" max="10" value="0"></label>
+      </div>
+    </div>
+    <div class="card"><div class="between"><h2>Priorités du jour</h2><button class="secondary" onclick="addTask()">+ Tâche</button></div><div id="tasks"></div></div>
+  </section>
+
+  <section id="football" class="section">
+    <div class="card hero"><h2>⚽ NRZ Performance</h2><p class="muted">Joueur • ST / profil offensif</p></div>
+    <div class="card"><h2>Ajouter une activité</h2><div class="formgrid">
+      <input id="fType" placeholder="Ex: Entraînement NRZ"><input id="fDuration" type="number" placeholder="Minutes">
+    </div><br><button onclick="addFootball()">Ajouter</button></div>
+    <div class="card"><h2>Objectifs joueur</h2><span class="tag">⚡ Accélération</span><span class="tag">🎯 Finition</span><span class="tag">🏃 Runs in behind</span><span class="tag">🧠 Décision</span><span class="tag">💪 Force</span></div>
+    <div class="card"><h2>Historique</h2><div id="footballList"></div></div>
+  </section>
+
+  <section id="work" class="section">
+    <div class="card"><h2>🏨 Travail</h2><p>Planning de base: <b>09:00–14:00</b>, dimanche à jeudi.</p>
+      <label class="muted">Note du jour<textarea id="workNote" rows="4" placeholder="Ce que j'ai appris / réalisé..."></textarea></label><br><button onclick="saveWork()">Enregistrer</button>
+    </div>
+  </section>
+
+  <section id="study" class="section">
+    <div class="card"><h2>🎓 Études</h2><div class="formgrid"><input id="studySubject" placeholder="Matière"><input id="studyMinutes" type="number" placeholder="Minutes"></div><br><button onclick="addStudy()">Ajouter session</button></div>
+    <div class="card"><h2>Sessions</h2><div id="studyList"></div></div>
+  </section>
+
+  <section id="stats" class="section">
+    <div class="card"><h2>📊 Vue d'ensemble</h2><p class="muted">Les données sont sauvegardées sur cet appareil dans cette V1.</p>
+      <div id="statsBody"></div>
+    </div>
+    <div class="card"><h2>⚙️ Données</h2><div class="row"><button onclick="exportData()">Exporter JSON</button><button class="secondary" onclick="resetData()">Réinitialiser</button></div></div>
+  </section>
+</main>
+<nav>
+  <button class="active" onclick="show('home',this)">🏠<br>Accueil</button>
+  <button onclick="show('football',this)">⚽<br>Football</button>
+  <button onclick="show('work',this)">🏨<br>Travail</button>
+  <button onclick="show('study',this)">🎓<br>Études</button>
+  <button onclick="show('stats',this)">📊<br>Stats</button>
+</nav>
+<script>
+const KEY='akramLifeOS_v1';
+let db=JSON.parse(localStorage.getItem(KEY)||'{"tasks":[],"football":[],"study":[],"checkins":{},"work":{}}');
+const today=()=>new Date().toISOString().slice(0,10);
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render();}
+function show(id,btn){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');render();}
+function calcReady(){let c=db.checkins[today()]||{sleep:7,energy:7,fatigue:3,pain:0};let s=Math.max(0,Math.min(100,(c.sleep/8*35)+(c.energy/10*30)+((10-c.fatigue)/10*20)+((10-c.pain)/10*15)));return Math.round(s)}
+function saveCheckin(){db.checkins[today()]={sleep:+sleep.value,energy:+energy.value,fatigue:+fatigue.value,pain:+pain.value};save();}
+function addTask(){let t=prompt('Tâche à ajouter');if(t){db.tasks.push({id:Date.now(),date:today(),text:t,done:false});save();}}
+function toggleTask(id){let t=db.tasks.find(x=>x.id===id);if(t)t.done=!t.done;save();}
+function addFootball(){let type=fType.value.trim();let duration=+fDuration.value||0;if(!type)return alert('Ajoute le type de séance.');db.football.push({date:today(),type,duration});fType.value='';fDuration.value='';save();}
+function addStudy(){let subject=studySubject.value.trim();let minutes=+studyMinutes.value||0;if(!subject||!minutes)return alert('Ajoute matière et durée.');db.study.push({date:today(),subject,minutes});studySubject.value='';studyMinutes.value='';save();}
+function saveWork(){db.work[today()]=workNote.value;save();alert('Note enregistrée.');}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='akram-life-os-backup.json';a.click();URL.revokeObjectURL(a.href);}
+function resetData(){if(confirm('Supprimer toutes les données locales ?')){localStorage.removeItem(KEY);location.reload();}}
+function render(){
+ dateLabel.textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ let r=calcReady();readiness.textContent=r+'%';readinessText.textContent=r>=80?'🟢 Très bonne disponibilité.':r>=60?'🟡 Disponibilité correcte, contrôle la charge.':'🔴 Priorité à la récupération.';
+ let ft=db.football.filter(x=>x.date===today()).length;footballToday.textContent=ft;
+ let sm=db.study.filter(x=>x.date===today()).reduce((a,x)=>a+x.minutes,0);studyToday.textContent=sm+'m';
+ let ts=db.tasks.filter(x=>x.date===today()),done=ts.filter(x=>x.done).length;discipline.textContent=ts.length?Math.round(done/ts.length*100)+'%':'0%';
+ tasks.innerHTML=ts.length?ts.map(t=>`<div class="task"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id})"><span>${escapeHtml(t.text)}</span></div>`).join(''):'<p class="muted">Aucune tâche. Ajoute tes priorités.</p>';
+ let c=db.checkins[today()];if(c){sleep.value=c.sleep;energy.value=c.energy;fatigue.value=c.fatigue;pain.value=c.pain}
+ footballList.innerHTML=db.football.slice().reverse().slice(0,15).map(x=>`<div class="task"><span>⚽ ${escapeHtml(x.type)}<br><small class="muted">${x.date} • ${x.duration} min</small></span></div>`).join('')||'<p class="muted">Aucune séance.</p>';
+ studyList.innerHTML=db.study.slice().reverse().slice(0,15).map(x=>`<div class="task"><span>🎓 ${escapeHtml(x.subject)} — ${x.minutes} min<br><small class="muted">${x.date}</small></span></div>`).join('')||'<p class="muted">Aucune session.</p>';
+ workNote.value=db.work[today()]||'';
+ statsBody.innerHTML=`<p><b>Football:</b> ${db.football.length} activités</p><p><b>Étude:</b> ${db.study.reduce((a,x)=>a+x.minutes,0)} minutes cumulées</p><p><b>Tâches:</b> ${db.tasks.filter(x=>x.done).length}/${db.tasks.length} terminées</p><div class="bar"><i style="width:${r}%"></i></div>`;
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+render();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body></html>

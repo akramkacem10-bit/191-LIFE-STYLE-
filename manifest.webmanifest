@@ -1,0 +1,10 @@
+{
+  "name": "AKRAM LIFE OS",
+  "short_name": "AKRAM OS",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#111827",
+  "lang": "fr",
+  "icons": []
+}
