@@ -55,13 +55,43 @@
     <div class="card"><div class="between"><h2>Priorités du jour</h2><button class="secondary" onclick="addTask()">+ Tâche</button></div><div id="tasks"></div></div>
   </section>
 
+  <!-- قسم كرة القدم المطور (Football Manager) -->
   <section id="football" class="section">
-    <div class="card hero"><h2>⚽ NRZ Performance</h2><p class="muted">Joueur • ST / profil offensif</p></div>
-    <div class="card"><h2>Ajouter une activité</h2><div class="formgrid">
-      <input id="fType" placeholder="Ex: Entraînement NRZ"><input id="fDuration" type="number" placeholder="Minutes">
-    </div><br><button onclick="addFootball()">Ajouter</button></div>
-    <div class="card"><h2>Objectifs joueur</h2><span class="tag">⚡ Accélération</span><span class="tag">🎯 Finition</span><span class="tag">🏃 Runs in behind</span><span class="tag">🧠 Décision</span><span class="tag">💪 Force</span></div>
-    <div class="card"><h2>Historique</h2><div id="footballList"></div></div>
+    <div class="card hero">
+      <h2>⚽ NRZ Performance (ST)</h2>
+      <p class="muted">Suivi des entraînements et des matchs • Profil Buteur</p>
+    </div>
+    
+    <div class="card">
+      <h2>Enregistrer une session / match</h2>
+      <div class="formgrid">
+        <select id="fType">
+          <option value="Entraînement NRZ">Entraînement NRZ</option>
+          <option value="Entraînement Fédéral/Perso">Entraînement Fédéral/Perso</option>
+          <option value="Match Officiel">Match Officiel</option>
+        </select>
+        <input id="fDuration" type="number" placeholder="Durée (min)" value="90">
+        <input id="fGoals" type="number" placeholder="Buts (Goals)" value="0">
+        <input id="fAssists" type="number" placeholder="Assists" value="0">
+      </div>
+      <br>
+      <label class="muted">Notes tactiques / AI Performance Agent<textarea id="fNotes" rows="2" placeholder="Ex: Bons appels en profondeur, à travailler la finition sous pression..."></textarea></label>
+      <br><button onclick="addFootball()" style="margin-top: 8px; width: 100%;">Ajouter la performance</button>
+    </div>
+
+    <div class="card">
+      <h2>Objectifs Attaque (ST)</h2>
+      <span class="tag">⚡ Accélération</span>
+      <span class="tag">🎯 Finition</span>
+      <span class="tag">🏃 Runs in behind</span>
+      <span class="tag">🧠 Décision</span>
+      <span class="tag">💪 Force</span>
+    </div>
+
+    <div class="card">
+      <h2>Historique & Performances</h2>
+      <div id="footballList"></div>
+    </div>
   </section>
 
   <section id="work" class="section">
@@ -105,7 +135,20 @@ function saveCheckin(){
 
 function addTask(){let t=prompt('Tâche à ajouter');if(t){db.tasks.push({id:Date.now(),date:today(),text:t,done:false});save();}}
 function toggleTask(id){let t=db.tasks.find(x=>x.id===id);if(t)t.done=!t.done;save();}
-function addFootball(){let type=fType.value.trim();let duration=+fDuration.value||0;if(!type)return alert('Ajoute le type de séance.');db.football.push({date:today(),type,duration});fType.value='';fDuration.value='';save();}
+
+function addFootball(){
+  let type=fType.value;
+  let duration=+fDuration.value||0;
+  let goals=+fGoals.value||0;
+  let assists=+fAssists.value||0;
+  let notes=fNotes.value.trim();
+  
+  db.football.push({date:today(),type,duration,goals,assists,notes});
+  fDuration.value='90'; fGoals.value='0'; fAssists.value='0'; fNotes.value='';
+  save();
+  alert('Performance enregistrée avec succès ! ⚽');
+}
+
 function addStudy(){let subject=studySubject.value.trim();let minutes=+studyMinutes.value||0;if(!subject||!minutes)return alert('Ajoute matière et durée.');db.study.push({date:today(),subject,minutes});studySubject.value='';studyMinutes.value='';save();}
 function saveWork(){db.work[today()]=workNote.value;save();alert('Note enregistrée.');}
 function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='akram-life-os-backup.json';a.click();URL.revokeObjectURL(a.href);}
@@ -123,7 +166,7 @@ function render(){
    adviceBox.innerHTML='🤖 <b>AI Préparateur:</b> Énergie optimale. Parfait pour une grosse séance physique ou un entraînement intense avec NRZ.';
  } else if(r>=60){
    readinessText.textContent='🟡 Disponibilité correcte, contrôle la charge.';
-   adviceBox.innerHTML='🤖 <b>AI Préparateur:</b> Forme stable. Privilégйe la technique et évite de surcharger la journée.';
+   adviceBox.innerHTML='🤖 <b>AI Préparateur:</b> Forme stable. Privilégie la technique et évite de surcharger la journée.';
  } else {
    readinessText.textContent='🔴 Priorité à la récupération.';
    adviceBox.innerHTML='🤖 <b>AI Préparateur:</b> Alerte fatigue/récupération ! Réduis l’intensité et concentre-toi sur le repos.';
@@ -137,10 +180,20 @@ function render(){
  let c=db.checkins[today()];
  if(c){sleep.value=c.sleep;energy.value=c.energy;fatigue.value=c.fatigue;pain.value=c.pain}
  
- footballList.innerHTML=db.football.slice().reverse().slice(0,15).map(x=>`<div class="task"><span>⚽ ${escapeHtml(x.type)}<br><small class="muted">${x.date} • ${x.duration} min</small></span></div>`).join('')||'<p class="muted">Aucune séance.</p>';
+ footballList.innerHTML=db.football.slice().reverse().slice(0,15).map(x=>`
+   <div class="task" style="flex-direction:column; align-items:flex-start;">
+     <span><b>⚽ ${escapeHtml(x.type)}</b> (${x.duration} min)</span>
+     <span class="muted">🎯 Buts: ${x.goals} | 👟 Assists: ${x.assists}</span>
+     ${x.notes ? `<small style="color: #22d3ee; margin-top: 4px;">💬 ${escapeHtml(x.notes)}</small>` : ''}
+     <small class="muted" style="margin-top:2px;">📅 ${x.date}</small>
+   </div>
+ `).join('')||'<p class="muted">Aucune séance enregistrée.</p>';
+
  studyList.innerHTML=db.study.slice().reverse().slice(0,15).map(x=>`<div class="task"><span>🎓 ${escapeHtml(x.subject)} — ${x.minutes} min<br><small class="muted">${x.date}</small></span></div>`).join('')||'<p class="muted">Aucune session.</p>';
  workNote.value=db.work[today()]||'';
- statsBody.innerHTML=`<p><b>Football:</b> ${db.football.length} activités</p><p><b>Étude:</b> ${db.study.reduce((a,x)=>a+x.minutes,0)} minutes cumulées</p><p><b>Tâches:</b> ${db.tasks.filter(x=>x.done).length}/${db.tasks.length} terminées</p><div class="bar"><i style="width:${r}%"></i></div>`;
+ 
+ let totalGoals = db.football.reduce((a,x)=>a+(x.goals||0),0);
+ statsBody.innerHTML=`<p><b>Football:</b> ${db.football.length} activités | ⚽ ${totalGoals} Buts</p><p><b>Étude:</b> ${db.study.reduce((a,x)=>a+x.minutes,0)} minutes cumulées</p><p><b>Tâches:</b> ${db.tasks.filter(x=>x.done).length}/${db.tasks.length} terminées</p><div class="bar"><i style="width:${r}%"></i></div>`;
 }
 
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
